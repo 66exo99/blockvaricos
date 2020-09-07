@@ -1,0 +1,403 @@
+// Общие JS-функции для всего сайта
+var to_load=[];
+
+//txt_buttom - set the text on the button, default == OK
+function show_modal(header, txt, url,txt_buttom){
+  var html="<div class=\"modal_conteiner\"><div><div class=\"modal_header\">{header}</div></div><div class=\"modal_body\">txt</div><br/><div style=\"text-align:center;\"><span class=\"pntr card-book-green-button\" id=\"but_ok\">txt_buttom</span><br/><br/></div></div>";
+  html=html.replace("{header}",header);
+  html=html.replace("txt",txt);
+  if ((txt_buttom==undefined) || (txt_buttom=="")){
+    html=html.replace("txt_buttom","OK");
+  }else{
+    html=html.replace("txt_buttom",txt_buttom);
+  }
+  $.modal(html,{
+                      opacity:90,
+      focus:false,
+      overlayClose:true,
+                      overlayCss: {backgroundColor:"#fff"},
+
+
+                      onShow: function(dialog){
+                          var modal = this;
+                          $('#but_ok', dialog.data[0]).click(function () {
+				                    $.modal.close();
+                            if ((url!==undefined)&&(url!=""))
+                               window.location=url;
+			                      });
+                          }
+                      });
+  }
+
+// Модальное окно с 2 кнопками: "Подтверждаю" и "Отмена"
+function show_modal_2(header, txt, url){
+  //var html="<div class=\"modal_conteiner\"><div style=\"background-color:#0076af; margin:1px;\"><table width=\"100%\"  cellspacing=0 cellpadding=0><tr><td><div class=\"modal_header\">{header}</div></td><td width=\"70px\"><table border=0 align=\"right\"><tr><td><img src=\"images/icons/cancel_16.png\"/></td><td> <a id=\"but_close\" href=\"#\" class=\"modal_close\">Закрыть</a></td></tr></table></td></tr></table></div><div class=\"modal_body\">txt</div><br/><div style=\"text-align:center;\"><span class=\"pntr card-book-green-button\" id=\"but_ok\">Подтверждаю</span> &nbsp;&nbsp;&nbsp; <span class=\"pntr card-book-red-button\" id=\"but_cancel\">Отмена</span><br/><br/></div></div>";
+  var html="<div class=\"modal_conteiner\"><div><table width=\"100%\"  cellspacing=0 cellpadding=0><tr><td><div class=\"modal_header\">{header}</div></td><td class=\"modal_close\"><span id=\"but_close\">x</span></td></tr></table></div><div class=\"modal_body\">txt</div><br/><div style=\"text-align:center;\"><span class=\"pntr card-book-green-button\" id=\"but_ok\">Подтверждаю</span> &nbsp;&nbsp;&nbsp; <span class=\"pntr card-book-red-button\" id=\"but_cancel\">Отмена</span><br/><br/></div></div>";
+  html=html.replace("{header}",header);
+  html=html.replace("txt",txt);
+  $.modal(html,{
+                      opacity:90,
+      focus:false,
+      overlayClose:true,
+                      overlayCss: {backgroundColor:"#fff"},
+
+
+                      onShow: function(dialog){
+                          var modal = this;
+                          $('#but_ok', dialog.data[0]).click(function () {
+				                    $.modal.close();
+                            if ((url!==undefined)&&(url!=""))
+                               window.location=url;
+			                      });
+                          $('#but_cancel', dialog.data[0]).click(function () {
+				                    $.modal.close();
+     	                      });
+                          $('#but_close', dialog.data[0]).click(function () {
+                            $.modal.close();
+                             });
+                          }
+                      });
+  }
+
+function show_modal_3(header,txt,callback){
+  var html="<div class=\"modal_conteiner\"><div><table width=\"100%\" cellspacing=0 cellpadding=0><tr><td><div class=\"modal_header\">{header}</div></td><td class=\"modal_close\"><span id=\"but_close\">x</span></td></tr></table></div><div class=\"modal_body\">txt</div><div style=\"text-align:center;\"><span class=\"pntr card-book-green-button\" id=\"but_ok\">Подтверждаю</span> &nbsp;&nbsp;&nbsp; <span class=\"pntr card-book-red-button\" id=\"but_cancel\">Отмена</span><br/><br/></div></div>";
+  html=html.replace("{header}",header);
+  html=html.replace("txt",txt);
+  $.modal(html,{
+                      opacity:90,
+                      focus:false,
+                      overlayClose:true,
+                      overlayCss: {backgroundColor:"#fff"},
+
+                      onShow: function(dialog){
+                          var modal = this;
+                          $('#but_ok', dialog.data[0]).click(function () {
+                            callback();
+                            $.modal.close();
+                            });
+                          $('#but_cancel', dialog.data[0]).click(function () {
+                            $.modal.close();
+                             });
+                          $('#but_close', dialog.data[0]).click(function () {
+                            $.modal.close();
+                             });
+                          }
+                      });
+  }
+  function show_modal_4(header,txt,callback1,callback2){
+  var html="<div class=\"modal_conteiner\"><div><table width=\"100%\" cellspacing=0 cellpadding=0><tr><td><div class=\"modal_header\">{header}</div></td><td class=\"modal_close\"><span id=\"but_close\">x</span></td></tr></table></div><div class=\"modal_body\">txt</div><div style=\"text-align:center;\"><span class=\"pntr card-book-green-button\" id=\"but_ok\">Подтверждаю</span> &nbsp;&nbsp;&nbsp; <span class=\"pntr card-book-red-button\" id=\"but_cancel\">Отмена</span><br/><br/></div></div>";
+  html=html.replace("{header}",header);
+  html=html.replace("txt",txt);
+  $.modal(html,{
+                      opacity:90,
+      focus:false,
+      overlayClose:true,
+                      overlayCss: {backgroundColor:"#fff"},
+
+                      onShow: function(dialog){
+                          var modal = this;
+                          $('#but_ok', dialog.data[0]).click(function () {
+                            callback1();
+                            $.modal.close();
+                            });
+                          $('#but_cancel', dialog.data[0]).click(function () {
+                            callback2();
+                            $.modal.close();
+                             });
+                          $('#but_close', dialog.data[0]).click(function () {
+                            callback2();
+                            $.modal.close();
+                             });
+                          }
+                      });
+  }
+
+function change_fav(d,obj){
+  var isin=$(d).hasClass('in_fav');
+  $(d).removeClass('in_fav').removeClass('out_fav').addClass('loading');
+  var flag=1;
+  if (isin) flag=-1;
+  var title=$(d).attr('title');
+  // call service
+  $.ajax({
+    url: ServiceUrl+"users.php?users_action=set_favs&users_flag="+flag+"&users_id="+obj,
+    success: function(r){
+      $(d).removeClass('loading');
+      if (isin) {
+        $(d).addClass('out_fav');
+        var newtitle="Поместить книгу в избранное";
+        $(d).attr('title', newtitle);
+        }else{
+          $(d).addClass('in_fav');
+          var newtitle="Убрать книгу из избранного";
+          $(d).attr('title', newtitle);
+          }
+      },
+    error: function(r){
+      $(d).removeClass('loading');
+      if (isin) {
+        $(d).addClass('in_fav');
+        var newtitle=title.replace("Убрать из избранного","Поместить в избранное");
+        $(d).attr('title', newtitle);
+        }else{
+          $(d).addClass('out_fav');
+          var newtitle=title.replace("Поместить в избранное","Убрать из избранного");
+          $(d).attr('title', newtitle);
+          }
+      }
+    });
+  }
+
+function change_fav_txt(d,obj){
+  var isin=$(d).hasClass('in_fav_txt');
+  $(d).removeClass('in_fav_txt').removeClass('out_fav_txt').text("обновление...");
+  var flag=1;
+  if (isin) flag=-1;
+  // call service
+  $.ajax({
+    url: ServiceUrl+"users.php?users_action=set_favs&users_flag="+flag+"&users_id="+obj,
+    success: function(r){
+      if (isin) {
+        $(d).text('Поместить в избранное');
+        $(d).addClass('out_fav_txt');
+        }else{
+          $(d).text('Убрать из избранного');
+          $(d).addClass('in_fav_txt');
+          }
+      },
+    error: function(r){
+      $(d).text('Избранное');
+      if (isin) {
+        $(d).addClass('in_fav_txt');
+        }else{
+          $(d).addClass('out_fav_txt');
+          }
+      }
+    });
+  }
+
+function change_fav_txt2(d,obj){
+  var html_to='<img style="height: 25px; float: left;" src="images/plus_i.png"/><div style="float: right; margin-left: 8px;">В избранное</div>';
+  var html_from='<img style="height: 25px; float: left;" src="images/minus_i.png"/><div style="float: right; margin-left: 8px;">Из избранного</div>';
+  var html_upd='<img style="height: 25px; float: left;" src="images/loading.gif"/><div style="float: right; margin-left: 8px;">обновление...</div>';
+  var isin=$(d).hasClass('in_fav_txt');
+  $(d).removeClass('in_fav_txt').removeClass('out_fav_txt').html(html_upd);
+  var flag=1;
+  if (isin) flag=-1;
+  // call service
+  $.ajax({
+    url: ServiceUrl+"users.php?users_action=set_favs&users_flag="+flag+"&users_id="+obj,
+    success: function(r){
+      if (isin) {
+        $(d).html(html_to);
+        $(d).addClass('out_fav_txt');
+        }else{
+          $(d).html(html_from);
+          $(d).addClass('in_fav_txt');
+          }
+      },
+    error: function(r){
+      if (isin) {
+        $(d).html(html_from);
+        $(d).addClass('in_fav_txt');
+        }else{
+          $(d).html(html_to);
+          $(d).addClass('out_fav_txt');
+          }
+      }
+    });
+  return false;
+  }
+
+function BlockedMsg(msg){
+    if(msg==undefined){
+        msg='Данный функционал временно отключен или заблокирован.';
+    }
+  show_modal("Ограничение!",msg);
+  return false;
+  }
+
+function show_hide(id){
+  if ($(id).css("display")=='none'){
+    $(id).css("display","block");
+    }else{
+      $(id).css("display","none");
+      }
+  }
+
+function fav_lock(act,obj_id,uid,obj,new_src){
+  // obj - объект - кнопка(картинка)
+  var w=obj.attr("src");
+  obj.attr("src","images/loading.gif");
+  $.ajax({
+    url: ServiceUrl+"users.php?users_action=fav_lock&users_uid="+uid+"&users_oid="+obj_id+"&users_act="+act,
+    success: function(r){
+      obj.attr("src",new_src);
+      if (act=="add") obj.click(function(){
+        fav_lock("del",obj_id,uid,obj,w);
+        }).attr("title","Удалить из личной подборки");
+      if (act=="del") obj.click(function(){
+        fav_lock("add",obj_id,uid,obj,w);
+        }).attr("title","Добавить в личную подборку");
+      },
+    error: function(){
+      obj.attr("src",w);
+      }
+    });
+  return false;
+  }
+
+function reload_carusel(num,url,uid){
+  $("#il_"+num).removeClass("hidden");
+  $.ajax({
+    url: url,
+    success: function(r){
+      $("#reloadable_"+num).html(r);
+      $("#carousel-image-and-text"+num).touchCarousel({
+            pagingNav: false,
+            snapToItems: true,
+            itemsPerMove: 3,
+            scrollbar: false
+        });
+      $("#book-card-carousel_prev"+num).click(function(){
+            $("#carousel-image-and-text"+num).data('touchCarousel').prev();
+            return false;
+        });
+
+      $("#book-card-carousel_next"+num).click(function(){
+            $("#carousel-image-and-text"+num).data('touchCarousel').next();
+            return false;
+        });
+
+      $(".to_lock").removeClass("to_lock").attr("title","Добавить к личной подборке").click(function(){
+        return fav_lock("add",$(this).attr("obj"),uid,$(this),"images/icons/sticky-notes--minus.png");
+        });
+      $(".from_lock").removeClass("from_lock").attr("title","Удалить книгу из личной подборки").click(function(){
+        return fav_lock("del",$(this).attr("obj"),uid,$(this),"images/icons/sticky-notes--plus.png");
+        });
+      $(".bc_selector").change(function(){
+        var w=$(this).attr("data");
+        if ($(this).val()!=w){
+          $(this).attr("data",$(this).val());
+          reload_carusel($(this).attr("num"),$(this).val(),uid);
+          }
+        }).styler();
+      set_jt_big();
+      }
+    });
+  }
+
+function set_jt_big(){
+    $(".jt_big").cluetip({
+            cluetipClass: "jtip",
+            arrows: false,
+            dropShadow: false,
+            hoverIntent: false,
+            sticky: false,
+            mouseOutClose: true,
+            closePosition: "title",
+            closeText: "Закрыть",
+            splitTitle: "|",
+            width: 450
+            }).removeClass("jt_big");
+    }
+
+function init_global(){
+  if (to_load.length>0){
+      var q=[];
+      for(var i in to_load)
+        q.push(to_load[i].mark);
+      //console.log("index.php?action=blocks&"+'list='+q.join(","));
+      $.ajax({
+        url: "index.php?action=blocks",
+        dataType: "JSON",
+        method: "POST",
+        data: 'list='+q.join(","),
+        success: function(r){
+           for(var i in to_load)
+                if (to_load[i].mark in r)
+                    if ('place' in to_load[i]){
+                    if (to_load[i].place=='after') $("#"+to_load[i].id).after(r[to_load[i].mark]);
+                    } else{
+                    $("#"+to_load[i].id).css("display","none").html(r[to_load[i].mark]).fadeIn(100);
+                    }
+           set_jt_big();
+           },
+        error: function(){
+            console.log("ERROR");
+            }
+        });
+      }else{
+      set_jt_big();
+      }
+}
+
+$(function(){
+
+   $(".asch").change(function(){
+    var isel = $(this).prop("checked");
+    if (isel){
+      var obj=this;
+      $(".asch").each(function(){
+        if (this!=obj) {
+          $(this).removeAttr("checked");
+          $("#"+$(this).attr("id")+"-styler").removeClass("checked");
+          }
+        });
+      }
+    });
+
+   $(".a_lt").click(function(){
+      window.open('index.php?page=authors&lt='+$(this).text());
+      return false;
+      });
+
+   $(".example").click(function() {
+        $("#search_sm").val("Маркес");
+   });
+   });
+
+function show_lnk_cont(url,ext){
+    var html="";
+    if (ext=="jpg" || ext=="png"|| ext=="gif"|| ext=="svg"|| ext=="bmp"|| ext=="jpeg"|| ext=="tif") html="<img src='"+url+"' style='width:100%'/>";
+
+    if (ext=="pdf" || ext=="swf") window.open(url,"_blank");
+
+    if (ext=="mp3") html='<object id="player-934874576348748" type="application/x-shockwave-flash" data="player/uppod.swf" width="300" height="50">\
+    <param name="bgcolor" value="#ffffff" />\
+        <param name="allowFullScreen" value="true" />\
+        <param name="allowScriptAccess" value="always" />\
+        <param name="wmode" value="window" />\
+        <param name="movie" value="player/uppod.swf" />\
+        <param name="flashvars" value="m=audio&st=player/st/audio151-823-strip.txt&file='+url+'"/></object>';
+
+    if (ext=="mp4") html='<object id="player-934874576348748" type="application/x-shockwave-flash" data="player/uppod.swf" width="100%" height="100%">\
+        <param name="bgcolor" value="#ffffff" />\
+        <param name="allowFullScreen" value="true" />\
+        <param name="allowScriptAccess" value="always" />\
+        <param name="wmode" value="window" />\
+        <param name="movie" value="player/uppod.swf" />\
+        <param name="flashvars" value="m=video&file='+url+'" /></object>';
+
+    if (ext=="avi") html='<object classid="clsid:67DABFBF-D0AB-41fa-9C46-CC0F21721616" width="100%" height="100%" codebase="http://go.divx.com/plugin/DivXBrowserPlugin.cab">\
+        <param name="custommode" value="none" />\
+        <param name="autoPlay" value="false" />\
+        <param name="src" value='+url+' />\
+        <embed type="video/divx" src="'+url+'" custommode="none" width="100%" height="100%" autoPlay="true"  pluginspage="http://go.divx.com/plugin/download/"></embed></object>';
+
+    if (ext=="flv") html='<object id="player-934874576348748" type="application/x-shockwave-flash" data="player/uppod.swf" width="100%" height="100%">\
+        <param name="bgcolor" value="#ffffff" />\
+        <param name="allowFullScreen" value="true" />\
+        <param name="allowScriptAccess" value="always" />\
+        <param name="wmode" value="window" />\
+        <param name="movie" value="player/uppod.swf" />\
+        <param name="flashvars" value="m=video&file='+url+'" /></object>';
+
+    if (html!="")
+        show_modal("Мультимедийные приложения к книге",html);
+}
+
+function sub_form(id){
+  $("#"+id).submit();
+  return false;
+}

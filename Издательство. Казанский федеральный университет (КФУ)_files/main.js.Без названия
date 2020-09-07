@@ -1,0 +1,181 @@
+//	Устанавливаем куку
+function cookie_set(name, value, expires, path, domain, secure)
+{
+	if (!expires) {
+		expires = new Date();
+		expires.setTime(expires.getTime() + (60*60*24*1000)); // вычисляем срок хранения cookie
+	}
+	if (!path) path = "/";
+
+	document.cookie = name + "=" + escape(value) +
+		(expires ? "; expires=" + expires.toGMTString() : "") +
+		(path ? "; path=" + path : "") +
+		(domain ? "; domain=" + domain : "") +
+		(secure ? "; secure" : "");
+}
+
+//	Получаем куку
+function cookie_get(name)
+{
+	var cookie = " " + document.cookie;
+	var search = " " + name + "=";
+	var setStr = null;
+	var offset = 0;
+	var end = 0;
+	if (cookie.length > 0) {
+		offset = cookie.indexOf(search);
+		if (offset != -1) {
+			offset += search.length;
+			end = cookie.indexOf(";", offset)
+			if (end == -1) {
+				end = cookie.length;
+			}
+			setStr = unescape(cookie.substring(offset, end));
+		}
+	}
+	return(setStr);
+}
+
+//	Получаем ширину окна браузера
+function WindowWidth()
+{
+	var ww = document.documentElement;
+	return self.innerWidth || (ww && ww.clientWidth) || document.body.clientWidth;
+}
+
+
+//	Получаем выслту окна браузера
+function WindowHeight()
+{
+	var wh = document.documentElement;
+	return self.innerHeight || (wh && wh.clientHeight) || document.body.clientHeight;
+}
+
+// Ф-ия показа/скрытия кнопки листалки
+function showScroll(){
+	var t	= $('#SctollTop');
+
+	t.bind('click', function () {
+		if(t.hasClass('toUp') || (t.hasClass('up') && !t.hasClass('toDown')))
+			$('html, body').animate({ scrollTop: $('#content').offset().top }, 500);
+		else
+			$('html, body').animate({ scrollTop: $('#footer').offset().top - WindowHeight() }, 500);;
+	});
+
+	$(window).bind("scroll resize orientationchange load lockfixed:pageupdate", function (k) {
+
+		var st	= $(window).scrollTop(),
+			wh	= WindowHeight()/2;
+
+		if(st > 150 && !t.hasClass('show'))
+			t.addClass('show');
+		else if(st <= 150 && t.hasClass('show'))
+			t.removeClass('show');
+
+		if(!t.hasClass('up') && st > wh)
+			t.addClass('up').removeClass('down');
+		else if(!t.hasClass('down') && st <= wh)
+			t.addClass('down').removeClass('up');
+	});
+}
+
+//	"шторка" предзагрузчика на определенный блок
+function preloader(t, n)
+{
+	if(n === true)
+	{
+		if(!$('#preloader').length)
+		{
+			if(t.length)
+				t.append('<div id="preloader"><div class="mask"></div><div class="loader"></div></div>');
+			else
+				$('body').append('<div id="preloader"><div class="mask"></div><div class="loader"></div></div>');
+		}
+	}
+	else
+		$('#preloader').remove();
+}
+
+
+
+$(function(){
+
+	//	Инициализируем скролл вверх/вниз
+	showScroll();
+
+	//	Получаем кол-во новых сообщений
+	var mi	= $('#message_info');
+	if (mi.length) {
+		$.ajax({
+				   url     : ServiceUrl + "service.php",
+				   method  : "POST",
+				   data    : {
+					   page: 'mailer',
+					   m   : 'CheckUnread',
+				   },
+				   success : function (data) {
+				       data = parseInt(data);
+                       if (data > 0){
+					        mi.find('>span').text(data);
+                            mi.removeClass("zero").attr("title","У Вас есть новые сообщения: "+data+". Перейти к просмотру.");
+                            }
+				   }
+			   });
+	}
+
+	$('.user-topinfo .name').click(function (e) {
+    e.preventDefault();
+    $('.user-topinfo .user-menu').toggleClass('open');
+        // toggleHTML();
+      });
+
+
+  $(document).click(function(event) {
+    if (!$(event.target).closest(".user-topinfo .name, .user-topinfo .user-menu").length && $('.user-topinfo .user-menu').is('.open')) {
+      $('.user-topinfo .user-menu').removeClass('open');
+          // toggleHTML();
+        }
+      });
+
+  $('.view-btn a').click(function (e) {
+   e.preventDefault();
+   if (!$(this).is('.active')) {
+     $('.view-btn a').removeClass('active');
+     $('.authors-list').removeClass('view-grz');
+     $(this).addClass('active');
+     switch ($(this).data('view')){
+      case 'horizontal':
+      $('.authors-list').addClass('view-grz');
+      break;
+      default:
+      break;
+    }
+  }
+
+});
+
+  
+  $('.more').click(function (e) {
+    e.preventDefault();
+    $(this).next().slideToggle(300);
+            // $(this).parent().toggleClass('active');
+          });
+
+});
+
+
+
+function view_colls(num)
+{
+  if($(".coll_"+num).css('display') == "none")
+  {
+    $(".colls").each(function(){
+      $(this).css('display', 'none');
+    });
+  }
+  
+  $(".coll_"+num).each(function(){
+        //$(this).css('display', 'block');
+        $(this).slideToggle();
+      });
+}

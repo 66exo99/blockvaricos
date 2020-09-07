@@ -1,0 +1,86 @@
+$(window).load(function(){
+/**
+ * enables resizable data table columns.
+ * Script by Ingo Hofmann
+ */
+(function($) {
+
+    /**
+     * Widget makes columns of a table resizable.
+     */
+    $.widget("ih.resizableColumns", {
+
+        /**
+         * initializing columns
+         */
+        _create: function() {
+            this._initResizable();
+        },
+
+        /**
+         * init jQuery UI sortable
+         */
+        _initResizable: function() {
+
+            var colElement, colWidth, originalSize,colElement1, colWidth1, colminWidth, colminWidth1,colminWidthcenter,colminWidthleft,colminWidthright;
+            var table = this.element;
+			
+			
+            this.element.find("th").resizable({
+                // use existing DIV rather than creating new nodes
+				handles: {
+				
+                    "e": " .resizeHelper"
+                },
+   
+                // default min width in case there is no label
+                
+                
+                // set min-width to label size
+                create: function(event, ui) {
+                    colminWidthleft =  parseInt($("#left_column").attr("min-width"),10);
+                    colminWidthcenter =  parseInt($("#center_column").attr("min-width"),10);
+					colminWidthright =  parseInt($("#right_column").attr("min-width"),10);
+                },
+
+                // set correct COL element and original size
+                start: function(event, ui) {
+					var colIndex = ui.helper.index() + 1;
+					var colIndex1 = colIndex + 1;
+						colElement = table.find("colgroup > col:nth-child(" + colIndex + ")");
+						colWidth = parseInt(colElement.get(0).style.width, 10); // faster than width
+						colElement1 = table.find("colgroup > col:nth-child(" + colIndex1 + ")");
+						colWidth1 = parseInt(colElement1.get(0).style.width, 10); // faster than width
+						originalSize = ui.size.width;
+					
+					if (colIndex==1){
+						colminWidth=colminWidthleft;
+						colminWidth1=colminWidthcenter;
+					}
+					else{
+						colminWidth=colminWidthcenter;
+						colminWidth1=colminWidthright;
+					}
+                },
+
+                // set COL width
+                resize: function(event, ui) {
+                    var resizeDelta = ui.size.width - originalSize;
+					var newColWidth = colWidth + resizeDelta;
+					var newColWidth1 = colWidth1 - resizeDelta;
+					if ((newColWidth>colminWidth) && (newColWidth1>colminWidth1)){
+						colElement.width(newColWidth);
+						colElement1.width(newColWidth1);
+					}
+                    // height must be set in order to prevent IE9 to set wrong height
+                    $(this).css("height", "auto");
+                }
+            });
+        }
+
+    });
+
+    // init resizable
+    $(".resizable").resizableColumns();
+})(jQuery);
+});

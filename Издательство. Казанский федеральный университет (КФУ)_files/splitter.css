@@ -1,0 +1,60 @@
+#bodytpl {
+    table-layout: fixed;
+    border-collapse: collapse;
+    border: none;
+    width: 0; /* otherwise Chrome will not increase table size */
+}
+
+tr.last {
+    border-bottom: none;
+}
+
+th {
+    border-bottom: none;
+    position: relative;
+}
+
+th:last-of-type {
+    border-right: 0px;
+}
+
+th {
+    overflow: hidden;
+}
+/*
+resizable columns
+*/
+.scrollContainer {
+    overflow: auto;
+    width: 700px;
+    height: 100%;
+}
+
+.resizeHelper{
+  background-color: transparent;
+  opacity: 0.3;
+  }
+.resizeHelper:hover{
+  /*background-color: #DDF;*/
+  background-image: url(../../images/icons/vline.gif);
+  background-repeat: repeat-y; 
+  opacity: 0.5;
+  }
+  
+ .resizeHelper,.ui-resizable-e {
+    cursor: e-resize;
+    width: 10px;
+    height: 100%;
+    top: 0;
+    right: 0px;
+    position: absolute;
+    z-index: 100;
+}
+
+/* handle for FF */
+@-moz-document url-prefix() {
+    .resizeHelper,.ui-resizable-e {
+        position: relative;
+        float: right;
+    }
+}

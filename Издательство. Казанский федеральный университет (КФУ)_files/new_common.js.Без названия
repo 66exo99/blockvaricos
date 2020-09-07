@@ -1,0 +1,211 @@
+compl_lock = false;
+$( document ).ready(function() {
+    $(".head").click(function(){
+         $(this).parent().find('div:not(.head)').slideToggle(800);
+    });
+    $(".a_lt_new").click(function(){
+      window.open('index.php?page=authors_red&lt='+$(this).text());
+      return false;
+      });
+      
+      $(".atcmpl").width($("#search_sm").width() - 20);
+      
+      url = getUrlVars();
+      if(url['s_meta'] != "undefined")
+      {
+        $("#s_meta_"+url['s_meta']).addClass("active");
+      }
+      if(url['page'] == 'izdat_coll_nd') $("#izdat_coll").addClass("active");
+      if((url['page'] == 'razdel' || url['page'] == 'razdel_red') && (url['sel_node'] == '1391' || url['sel_node'] == '1392' || url['sel_node'] == '1393' || url['sel_node'] == '1394' || url['sel_node'] == '1395' || url['sel_node'] == '1396' || url['sel_node'] == '1397' || url['sel_node'] == '1398')) $("#razd").addClass('active');
+      if((url['page'] == 'razdel' || url['page'] == 'razdel_red') && (url['sel_node'] == '1374' || url['sel_node'] == '1366' || url['sel_node'] == '1367' || url['sel_node'] == '1368' || url['sel_node'] == '1369' || url['sel_node'] == '1370' || url['sel_node'] == '1372' || url['sel_node'] == '1373' || url['sel_node'] == '1375' || url['sel_node'] == '1376' || url['sel_node'] == '1377')) $("#s_meta_1").addClass('active');
+      if((url['page'] == 'razdel' || url['page'] == 'razdel_red') && (url['sel_node'] == '1378' || url['sel_node'] == '1371')) $("#s_meta_4").addClass('active');
+      if((url['page'] == 'razdel' || url['page'] == 'razdel_red') && (url['sel_node'] == '1406' || url['sel_node'] == '1410' || url['sel_node'] == '1413')) $("#s_meta_2").addClass('active');
+       if((url['page'] == 'razdel' || url['page'] == 'razdel_red') && (url['sel_node'] == '1403' || url['sel_node'] == '1404' || url['sel_node'] == '1405' || url['sel_node'] == '1408')) $("#s_meta_3").addClass('active');
+      if(url['page'] == 'multimed' || url['page'] == 'multimed_red' || url['page'] == 'podcast' || url['page'] == 'podcast_red' || url['page'] == 'video' || url['page'] == 'video_red' || url['page'] == 'maps' || url['page'] == 'maps_red' || url['page'] == 'exam' || url['page'] == 'simulator' || url['page'] == 'podcasti' || url['page'] == 'podcasti_red' || url['page'] == 'mapl' || url['page'] == 'mapl_red' || url['page'] == 'video_info' || url['page'] == 'video_info_red') $("#multimed").addClass('active');
+      
+      $('a').each(function (index) {
+        
+                this.href = this.href.replace('page=main_ub_red', 'page=main_ub');
+                this.href = this.href.replace('page=main_ub', 'page=main_ub_red');
+                
+                this.href = this.href.replace('page=room_red', 'page=room');
+                this.href = this.href.replace('page=room', 'page=room_red');
+                /*if(this.onclick != null)
+                {
+                    console.log(this.attr('onclick'));
+                    //this.onclick = this.onclick.replace('page=room', 'page=room_red');
+                }*/
+                
+                this.href = this.href.replace('page=multimed_red', 'page=multimed');
+                this.href = this.href.replace('page=multimed', 'page=multimed_red');
+                
+                this.href = this.href.replace('page=razdel_red&', 'page=razdel&');
+                this.href = this.href.replace('page=razdel&', 'page=razdel_red&');
+                
+                //this.href = this.href.replace('page=book_red&', 'page=book&');
+                this.href = this.href.replace('page=book&', 'page=book_red&');
+                
+                this.href = this.href.replace('page=search', 'page=search_red');
+                
+                this.href = this.href.replace('page=izdat_coll_nd', 'page=izdat_coll');
+                this.href = this.href.replace('page=izdat_coll', 'page=izdat_coll_nd');
+                
+                this.href = this.href.replace('page=static_red', 'page=static');
+                this.href = this.href.replace('page=static', 'page=static_red');
+                
+                this.href = this.href.replace('page=podcast_red&', 'page=podcast&');
+                this.href = this.href.replace('page=podcasti&', 'page=podcasti_red&');
+                this.href = this.href.replace('page=podcast&', 'page=podcast_red&');
+                this.href = this.href.replace(/page=podcast$/, 'page=podcast_red');
+                
+                this.href = this.href.replace('page=video_red&', 'page=video&');
+                this.href = this.href.replace('page=video&', 'page=video_red&');
+                this.href = this.href.replace(/page=video$/, 'page=video_red');
+                
+                this.href = this.href.replace('page=izdatelgalery_red', 'page=izdatelgalery');
+                this.href = this.href.replace('page=izdatelgalery', 'page=izdatelgalery_red');
+                
+                this.href = this.href.replace('page=partners_red', 'page=partners');
+                this.href = this.href.replace('page=partners', 'page=partners_red');
+                
+                this.href = this.href.replace('page=news_list', 'page=news_list_red');
+                
+                this.href = this.href.replace('page=news&', 'page=news_red&');
+                
+                this.href = this.href.replace('page=scan_on_demand', 'page=scan_on_demand_red');
+                
+                this.href = this.href.replace('page=kurs_list', 'page=kurs_list_red');
+                
+                this.href = this.href.replace('page=author&', 'page=author_red&');
+                
+                this.href = this.href.replace('page=maps&', 'page=maps_red&');
+                this.href = this.href.replace(/page=maps$/, 'page=maps_red');
+                
+                this.href = this.href.replace('page=mapl&', 'page=mapl_red&');
+                
+                this.href = this.href.replace('page=uchebniki', 'page=uchebniki_red');
+                
+                this.href = this.href.replace('page=book_view&', 'page=book_view_red&');
+                
+                this.href = this.href.replace('page=forgot', 'page=forgot_red');
+                
+                }
+      );
+      
+
+      $("#search_sm").keyup(function() {
+            autocomplit();
+      });
+      
+      $(document).click(function(event) {
+            if ($(event.target).closest(".search").length) return;
+            $(".atcmpl").slideUp();
+            event.stopPropagation();
+      });
+
+
+});
+
+function autocomplit()
+{
+    if(compl_lock) return;
+    compl_lock = true;
+    var q = $("#search_sm").val();
+    if(q.length > 2)
+    {
+        $(".atcmpl").load("?page=search_red&ajax=get_autocomplit&q="+q, {}, function(){
+            if($(".atcmpl").html().length > 0) $(".atcmpl").slideDown();
+            else $(".atcmpl").slideUp();
+            compl_lock = false;
+        });
+    }
+    else
+    {
+        $(".atcmpl").css("display", "none");
+        compl_lock = false;
+    }
+}
+
+function ExecByInterval(fn, time) {	
+	var lock, execOnUnlock, args;
+	return function() {
+		args = arguments;
+		if (!lock) {				
+			lock = true;
+			var scope = this;
+			setTimeout(function(){
+				lock = false;
+				if (execOnUnlock) {
+					args.callee.apply(scope, args);
+					execOnUnlock = false;
+				}
+			}, time);
+			return fn.apply(this, args);
+		} else execOnUnlock = true;
+	}
+}
+
+$(document).ready(function(){
+      $('.jt').cluetip({
+      cluetipClass: 'jtip',
+      arrows: false,
+      dropShadow: false,
+      hoverIntent: false,
+      sticky: false,
+      mouseOutClose: true,
+      closePosition: 'title',
+      closeText: 'Закрыть',
+      splitTitle: '|',
+      width: '400px'
+      }).removeClass("jt");
+      });
+      
+function getUrlVars()
+{
+    var vars = [], hash;
+    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    for(var i = 0; i < hashes.length; i++)
+    {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+    }
+    return vars;
+}
+
+function delLink(text)
+{
+    $('a.speed_link').each(function (index) {
+        if(this.html == text) this.style.display = none;
+    });
+}
+
+function BlockRazd(){
+    show_modal("Ошибка доступа","Приносим свои извинения. Данный раздел находится в разработке");
+    };
+    
+function view_colls(num)
+{
+    if($(".coll_"+num).css('display') == "none")
+    {
+        $(".colls").each(function(){
+            $(this).css('display', 'none');
+        });
+    }
+    
+    $(".coll_"+num).each(function(){
+        //$(this).css('display', 'block');
+        $(this).slideToggle();
+    });
+}
+function set_tabs(i, kol)
+{
+    for(j=1;j<=kol;j++)
+    {
+        $("#tbs_"+j).removeClass("active");
+        $("#tb_"+j).css("display", "none");
+    }
+
+    $("#tbs_"+i).addClass("active");
+    $("#tb_"+i).css("display", "block");
+}

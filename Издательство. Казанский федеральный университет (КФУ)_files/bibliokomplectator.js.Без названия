@@ -1,0 +1,558 @@
+/*	ф-я закрытия груп*/
+function CloseGroup(event)
+{
+	var p   = $('[data-group="' + event.data.group + '"]').closest('.form_block');
+	var c   = p.find('[data-control] ul');
+	var m   = p.find('[data-manager]');
+
+	if((!p.is(event.target) && p.has(event.target).length === 0) || m.is(event.target) || (c.has(event.target).length > 0 && !p.data('nocloseselect')))
+	{
+		p.removeClass('open');
+		$('[data-group="' + event.data.group + '"]').removeClass('open');
+		$('.fastselect [data-fastselect="' + event.data.group + '"]').removeClass('open');
+
+		//$(document).off('click', {group: event.data.group}, CloseGroup);
+		$(document).off('click', CloseGroup);
+	}
+}
+
+/*	ф-ия удаления из корзины с проверкой, является ли книжка коллекционной*/
+function dellFromFLTAndTest(type, id, trueDell)
+{
+	preloader($('#content'), true);
+
+	$.ajax({
+			   url    : ServiceUrl + "service.php",
+			   type : "POST",
+			   data   : {
+				   page: 'bibliokomplectator',
+				   m: 'dellFromFLTAndTest',
+				   out: 'json',
+				   p: {type:type, id:id}
+			   },
+			   dataType: "json",
+			   success: function (r) {
+				   console.log(r);
+				   if(r === false)
+					   show_modal("Удаление из корзины",'<span style="white-space: nowrap;">Произошла ошибка.</span>');
+				   else
+				   {
+					   if(r['inCollection'] && r['inCollection'].length > 0 && trueDell !== true)
+					   {
+						   if(confirm("Удаляемые книги входят в состав неделимых коллекций. Желаете удалить коллекции полностью?"))
+							   dellFromFLTAndTest(type, id, true);
+					   }
+					   else
+					   {
+						   show_modal("Удаление из корзины",'<span style="white-space: nowrap;">Удаление прошло успешно.</span>');
+
+						   if(id)
+						   {
+						   		if($('[data-id="'+id+'"][data-basketdelete="'+type+'"]').closest('tr').length > 0)
+						   			$('[data-id="'+id+'"][data-basketdelete="'+type+'"]').closest('tr').remove();
+						   		else
+									$('[data-id="'+id+'"][data-basketdelete="'+type+'"]').closest('.contein').remove();
+						   }
+						   else
+							   $('[data-basketdelete="'+type+'"]').closest('.contein').remove();
+					   }
+				   }
+			   },
+			   complete: function () {
+				   preloader(null, false);
+			   }
+		   });
+}
+
+window.is_show_bibliokomlectator   = cookie_get('bibliokomlectator');
+if(window.is_show_bibliokomlectator && window.is_show_bibliokomlectator == 1)
+	window.is_show_bibliokomlectator   = '';
+else
+	window.is_show_bibliokomlectator   = ' hidden';
+
+$(document).ready(function () {
+	//	Переключение режима библиокомлектатора
+    // + Перезагрузак страницы добавлена для всех случаев. Она нужна из-за ограничений "по дате корзины" в выдаче
+	$('#check_bibliokomlectator').click(function () {
+		var t		= $(this),
+			o		= t.hasClass('active'),
+			b		= $('#basket'),
+			buttons	= $('.buy_this_button, .unbuy_this_button, .basket_buts');
+
+        cookie_set('bibliokomlectator', (!o ? 1 : 0));
+
+        if (window.book_id){// страшный гемор, какие кнопки скрывать, а какие показать => просто обновим страницу
+            if (!o){
+                cookie_set('type_view', 'list');
+                cookie_set('filter_available', 'all');
+                }
+            window.location.reload();
+            return;
+        }
+
+		if(o)
+		{
+			//t.removeClass('active');
+			//b.addClass('hidden');
+			//buttons.addClass('hidden');
+			//window.is_show_bibliokomlectator	= ' hidden';
+            //$("#basket_actions").addClass("hidden");
+            //$("#standart_actions").removeClass("hidden");
+            window.location.reload();
+		}
+		else
+		{
+			//t.addClass('active');
+			//b.removeClass('hidden');
+			//buttons.removeClass('hidden');
+			window.is_show_bibliokomlectator	= '';
+            //$("#basket_actions").removeClass("hidden");
+            //$("#standart_actions").addClass("hidden");
+
+            // не нужно, т.к. страница будет перезагружена
+            //if(cookie_get('type_view') !== 'list')
+			//	$('.type_view .list').trigger('click');
+
+            cookie_set('type_view', 'list');
+            cookie_set('filter_available', 'all');
+
+            // https://nexmedia.megaplan.ru/task/1007082/card/
+            // показываем всплывашку
+            $.ajax({
+              url: ServiceUrl + "service.php?page=bibliokomplectator&m=GetCurrentBasket&out=json",
+              dataType: "JSON",
+              success: function(r){
+                r.tm = r.tm.split("-").reverse().join(".");
+                show_modal_4('Уважаемый клиент!', 'Для начала работы с комплектатором, пожалуйста, установите дату планируемой подписки.<br/>В режиме комплектования мы предложим контент, который будет доступен на год и более от указанной вами даты.<br/><br/><input id="start_order" type="text" value="'+r.tm+'" style="width:85px;"/>',function(){
+                  preloader($('#content'), true);
+                  $.ajax({
+                      url: ServiceUrl + "service.php?page=bibliokomplectator&m=UpdBasketInfo&parse&bibliokomplectator_id=current&bibliokomplectator_tm="+$("#start_order").val(),
+                      complete: function(){
+                        window.location.reload();
+                        }
+                      })
+                  }, function(){
+                    window.location.reload();
+                    });
+                $("#but_ok").html("Начать");
+                $("#but_cancel").remove();
+              }
+            });
+            // переключаем в вид "показывать все"
+            //av = cookie_get('filter_available');
+            //console.log("av: "+av);
+            //if (av != 'all'){
+            //    $('[data-filter_type=available][data-value=all]').trigger('click');
+            //    $('a.filter_ok').trigger('click');
+            //    }
+		}
+
+		return false;
+	});
+
+	//	Удаление книги/блока из корзины
+	$(document).on('click', '[data-basketdelete]', function(){
+		var t		= $(this),
+			id		= t.data('id'),
+			type	= t.data('basketdelete');
+
+		dellFromFLTAndTest(type, id);
+
+		return false;
+	});
+
+	//	Скачать xls или csv
+	$('.getxls, .getcsv').on('click', function () {
+		var t			= $(this),
+			komplect	= t.attr('id'),
+			type		= t.data('type'),
+			format		= t.data('format'),
+			url			= 'index.php?page=basket&komplect='+komplect+'&type='+type+'&ajax=get_file&type_file='+format;
+
+		window.open(url, "_blank");
+		return false;
+	});
+
+	//	Получение списка книг
+	$(document).on('click', '.myhead .open_close', function () {
+		var t       = $(this),
+			p       = t.closest('.myhead'),
+			c       = p.closest('.contein').find('>div');
+		o       = !c.hasClass('hidden'),
+			wo      = c.hasClass('wasopen'),
+			id      = p.data('id'),
+			type    = p.data('type'),
+			komplect= p.data('komplect');
+
+		if(o)
+		{
+			c.addClass('hidden');
+			p.removeClass('open');
+		}
+		else
+		{
+			if(!wo)
+			{
+				preloader($('#content'), true);
+				$.ajax({
+						   url    : ServiceUrl + "service.php",
+						   type : "POST",
+						   data   : {
+							   page: 'bibliokomplectator',
+							   m: 'getBooks',
+							   out: 'json',
+							   p: {type:type, id:id, komplect:komplect}
+						   },
+						   dataType: "json",
+						   success: function (data) {
+							   if(data)
+							   {
+								   for (var key in data) {
+									   var book    = data[key];
+
+									   c.find('table > tbody').append('<tr>' +
+										   '<td>'+book.descr+'</td>' +
+										   '<td>'+book.type+'</td>' +
+										   '<td>'+book.date+'</td>' +
+										   '<td style="text-align: center;"><a title="Удалить" data-id="'+book.id+'" data-basketdelete="ids"></a></td>' +
+										   '</tr>');
+								   }
+
+								   c.removeClass('hidden');
+								   p.addClass('open');
+							   }
+						   },
+						   complete: function () {
+							   c.addClass('wasopen');
+							   preloader(null, false);
+						   }
+					   });
+			}
+			else
+			{
+				c.removeClass('hidden');
+				p.addClass('open');
+			}
+		}
+
+		return false;
+	});
+
+	/*	Формы*/
+	/*$(document).on('focus keyup change', '.form_block input[type="text"], .form_block input[type="password"], .form_block textarea, .form_block.fastselect [data-fastselect]', function ()
+	{
+		var t = $(this);
+		var p = t.closest('.form_block');
+
+		p.addClass('focus');
+		if (p.hasClass('error'))
+		{
+			t.val('');
+			p.removeClass('error');
+		}
+	}).on('blur', '.form_block input, .form_block textarea', function ()
+	{
+		if ($.trim($(this).val()) === '')
+			$(this).closest('.form_block').removeClass('focus');
+	}).on('blur', '.form_block.fastselect input', function ()
+	{
+		var t   = $(this),
+			p       = t.closest('.fastselect');
+
+		if($.trim(t.val()) === '')
+		{
+			p.find('[data-manager]').text('');
+			p.find('[data-control] li').remove();
+			p.find('select > option').remove();
+			p.removeClass('focus');
+		}
+		else if (p.find('select > option:selected').length === 0)
+			p.removeClass('focus');
+	});
+
+	/*	Открывание одноуровневых меню с закрытием всех "одноклассников"*/
+	$(document).on('click', '[data-manager]', function (event)
+	{
+		var t = $(this);
+		var p = t.closest('.form_block');
+		var d = t.data('manager');
+		var g = t.data('group');
+		var c = $('[data-control="' + d + '"][data-group="' + g + '"]');
+		var fs = $('[data-fastselect="' + d + '"]');
+		var o = t.hasClass('open');
+
+		if (!o)
+		{
+			$('[data-group="' + g + '"]').removeClass('open');
+			t.addClass('open');
+			c.addClass('open');
+			p.addClass('open');
+			fs.addClass('open').focus();
+
+			if (!t.data('noclosegroup'))
+				$(document).on('click', {group: g}, CloseGroup);
+		}
+		else if (t.data('noclosegroup'))
+			$(document).off('click', CloseGroup);
+	});
+	$(document).on("click", "[data-control] > ul > li", function ()
+	{
+		var t = $(this);
+
+		if (!t.hasClass('disabled') && !t.closest('.filter'))
+		{
+			var p = t.parent();
+			var text = t.text();
+			var d   = t.closest('[data-control]').data('control');
+
+			p.closest('.form_block').removeClass('focus');
+			if (text && text !== '')
+				p.closest('.form_block').addClass('focus');
+
+			if(t.closest('.form_block.fastselect').length > 0)
+				$('[data-fastselect="'+d+'"').val(text);
+
+			p.find('.select').removeClass('select');
+			t.addClass('select');
+			$('select#' + d + ' > option#' + t.data('id')).prop('selected', true);
+			$('select#' + d).trigger('change');
+			$('[data-manager="' + t.closest('[data-control]').data('control') + '"]').text(text);
+		}
+	});
+
+    // Послать письмо
+    $(document).on('click', '.send', function(){
+        var but = $(this);
+        var html = '<p id="pars_cont" dat="'+but.attr("dat")+'">После отправки вашей комплектации в отдел продаж мы запретим ее редактирование. Это сделано для того, чтобы отдел продаж и вы видели одинаковые данные.</p><p>Вы сможете продолжить работу в новой комплектации.</p><p>Менеджер отдела продаж свяжется с вами как только рассчитает коммерческое предложение.</p>';
+        show_modal_3("Уважаемый подписчик!", html, function(){
+            $(".send, .fix_basket").addClass("hidden");// прячем,&nbsp;пока идет обработка запроса
+            $.ajax({
+                url    : ServiceUrl + "service.php",
+		        type : "POST",
+		        data   : {
+				   page: 'bibliokomplectator',
+				   m: 'SendEmailToManager',
+				   p: {id: $("#pars_cont").attr("dat"), tm: $("#date").val(), cnt: $("#countvuz").val()}
+			       },
+                success: function(r){
+                    show_modal_3("Спасибо за заявку!", "Ваша заявка успешно отправлена. Наш менеджер свяжется с Вами сразу,&nbsp;как обработает её.", function(){
+                      window.location.href="index.php?page=basket&view=main";
+                    });
+                    $("#but_ok").html("К списку комплектаций");
+                    $("#but_close, #but_cancel").remove();
+                },
+                error: function(){
+                    show_modal("Ошибка", "При обращении к серверу возникла ошибка. Попробуйте,&nbsp;пожалуйста,&nbsp;попозже.");
+                    $(".send, .fix_basket").removeClass("hidden");
+                }
+            });
+        });
+        $("#but_ok").html("Отправить заявку");
+    });
+
+    // фиксирование корзины
+    $(document).on('click', '.fix_basket', function(){
+        var but = $(this);
+        var rel = 0;
+        if (but.attr("reload"))
+            rel = 1;
+        var html = '<input type=text id="new_kname" placeholder="Название комплектации" style="width:100%;padding:5px;" dat="'+but.attr("dat")+'" reload="'+rel+'"/><br/><br/>Дайте название вашей комплектации, чтобы ее легко можно было найти в корзине. Вы сможете переключаться между комплектациями и редактировать их.';
+        show_modal_3('Пожалуйста, введите название комплектации', html, function(){
+          var rel = $("#new_kname").attr("reload");
+          $.ajax({
+            url    : ServiceUrl + "service.php",
+		    type : "POST",
+		    data   : {
+				   page: 'bibliokomplectator',
+				   m: 'FixBasket',
+				   p: {id: $("#new_kname").attr("dat"), kname: $("#new_kname").val()}
+			       },
+            success: function(r){
+                if (rel == "1")
+                    window.location.reload();
+                },
+            error: function(){
+                show_modal("Ошибка", "При обращении к серверу возникла ошибка. Попробуйте,&nbsp;пожалуйста,&nbsp;позже.");
+                }
+            });
+          });
+        $("#but_ok").html("Зафиксировать");
+    });
+
+    $(document).on('click', '.show_prices', function(){
+      show_modal('Подождите', 'Идет расчет цены. Пожалуйста,&nbsp;подождите.');
+      var url = ServiceUrl+'service.php?page=bibliokomplectator&m=getExelOrCSV&parse&bibliokomplectator_komplect_id='+$(this).attr("dat")+'&bibliokomplectator_type_file=json&bibliokomplectator_money=1';
+      $.ajax({
+        url: url,
+        success: function(r){
+            var data = JSON.parse(r);
+            if (data.sum){
+              $('.money').remove();
+              $("span[data-type='sum_info']").html("<table class='money'><tr><td>Общая стоимость БАЗОВОЙ ЧАСТИ: </td><td><b>"+data.sum.base+" р.</b></td></tr><tr><td>Общая стоимость КОЛЛЕКЦИЙ: </td><td><b>"+data.sum.colls+" р.</b></td></tr><tr><td>Общая стоимость всего: </td><td><b>"+data.sum.all+" р.</b></td></tr></table>");
+              delete(data.sum);
+              for(var i in data){
+                var cid = data[i].pop();
+                var tp = data[i].pop();
+                var price = data[i].pop();
+                var tgt = $("span[data-type='"+tp+"'][data-id='"+cid+"']");
+                if (tgt.length>0)
+                    tgt.append("<span class='money'><b>"+price+" р.</b></span>");
+              }
+            }
+        },
+        complete: function(){
+          $.modal.close();
+        }
+      });
+    });
+
+    $(document).on('click', '.import', function(){
+      var html="<form id='import_form' enctype='multipart/form-data' method='POST' action='index.php?page=basket&action=import'>"+
+        "<div>Укажите файл для импорта:</div>"+
+        "<input type='file' name='f' accept='*.xls,*.xlsx'>"+
+        "</form>";
+      show_modal_3('Импорт таблицы',html,function(){
+        $("#import_form").submit();
+      });
+    });
+
+    // удаление крупного элемента сразу с пересчетом остатка без перезагрузки
+    $(document).on('click', '.del_from_b', function(){
+        var tag = $(this).parent();
+
+        var pars = {
+          'komplectId': tag.data("komplect"),
+          }
+        var tp = tag.data("type");
+        pars['type'] = tp;
+
+        if (tp == 'ids' || tp == 'no_can_sale'){
+          pars['id'] = komplect_data[tp];
+        } else {
+          pars['id'] = komplect_data[tp][tag.data('id')];
+          pars['obj_id'] = tag.data('id');
+        }
+        var cnt = parseInt(tag.data("cnt"));
+
+        $.ajax({
+          url: ServiceUrl + "service.php",
+          type: "POST",
+          data: {
+            page: 'bibliokomplectator',
+            m: 'dellFromFLT',
+            p: pars
+          }
+        });
+
+        tag.parent().fadeOut(300, function(){
+          $(this).remove();
+        });
+        $(".count, .in_"+tp+"_count").each(function(){
+          $(this).text(parseInt($(this).text())-cnt);
+        });
+        $("#"+tp+"_count").text(parseInt($("#"+tp+"_count").text())-1);
+        return false;
+    });
+
+    // удаление комплектации или очистка,&nbsp;если она активна
+    $(document).on('click', '.del_k', function(){
+       $.ajax({
+          url: ServiceUrl + "service.php",
+          type: "POST",
+          data: {
+            page: 'bibliokomplectator',
+            m: ($(this).attr("stat") == "0")?'clearKomplect':'dellKomplect',
+            p: {id: $(this).attr("dat")}
+          }
+        });
+       if ($(this).attr("stat") != "0"){
+            $(this).closest("tr").remove();
+            }else{
+            show_modal("Готово", "Активная комплектация очищена");
+            }
+       return false;
+    });
+
+    // скачать таблицу (для частного случая)
+    $(document).on('click', 'a.down', function(){
+        var tag = $(this).parent();
+
+        var pars = {
+          'komplectId': tag.data("komplect"),
+          'type_file': $(this).attr("dat")
+          }
+        // имя файла/таблицы.
+        if ($(this).data("nm"))
+            pars['nm'] = $(this).data("nm");
+
+        var tp = tag.data("type");
+        pars['type'] = tp;
+
+        if (tp == 'ids' || tp == 'no_can_sale'){
+          if ($(this).data("src")){ // если источник данных не js-объект, а тег
+            pars['id'] = $("#"+$(this).data("src")).text();
+            } else {
+            pars['id'] = komplect_data[tp];
+            }
+        } else {
+          pars['id'] = komplect_data[tp][tag.data('id')].join(",");
+          pars['obj_id'] = tag.data('id');
+        }
+
+        var html="";
+        for (i in pars){
+          if (i=='id'){
+            html += "<textarea name='bibliokomplectator_"+i+"'>"+pars[i]+"</textarea>";
+          } else {
+            html += "<input type='hidden' name='bibliokomplectator_"+i+"' value='"+pars[i]+"'/>";
+            }
+        }
+
+        var url = ServiceUrl+"service.php?page=bibliokomplectator&m=getExcelOrCsvSub&parse";
+        var form = $('<form method="POST" action="'+url+'" target="_blank">'+html+'</form>');
+        $(document.body).append(form);
+        form.submit().remove();
+
+        return false;
+    });
+
+    // "сделать активной"
+    $(document).on('click', '.make_act', function(){
+        var pars = {id: $(this).attr("dat")};
+        $.ajax({
+          url: ServiceUrl + "service.php",
+          type: "POST",
+          data: {
+            page: 'bibliokomplectator',
+            m: 'ActivateBasket',
+            p: pars
+          },
+          success: function(r){
+            window.location.reload();
+          },
+          error: function(){
+            window.location.reload();
+          }
+        });
+    });
+
+	//	Подключаем ввод даты
+    $("#date").datepicker({minDate:"+1D", dateFormat: 'dd.mm.yy'});
+
+    $(document).on('change', '#date, #countvuz', function(){
+        var pars = {id: $(this).attr("dat"), tm: $("#date").val(), cnt: $("#countvuz").val()};
+        //console.log(pars);
+        $.ajax({
+          url: ServiceUrl + "service.php",
+          type: "POST",
+          data: {
+            page: 'bibliokomplectator',
+            m: 'UpdBasketInfo',
+            p: pars
+          },
+          success: function(r){
+            window.location.reload();
+          }
+        });
+    });
+});

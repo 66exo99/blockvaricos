@@ -1,0 +1,51 @@
+$(document).ready(function() {
+  $('.search-checkbox input, .v-to-section select, .search-min-select select, #ency-subject-tabs input, #search_input').styler();
+  
+  $('ul#exp-menu ul, ul#exp-menu .exp-menu-content').each(function(index) {
+    $(this).prev().addClass('collapsible').click(function() {
+      if ($(this).next().css('display') == 'none') {
+        $(this).next().slideDown(200, function () {
+          $(this).prev().removeClass('collapsed').addClass('expanded');
+        });
+      }else {
+        $(this).next().slideUp(200, function () {
+          $(this).prev().removeClass('expanded').addClass('collapsed');
+          $(this).find('ul').each(function() {
+            $(this).hide().prev().removeClass('expanded').addClass('collapsed');
+          });
+        });
+      }
+      return false;
+    });
+  });
+  
+  $( "#ency-subject-tabs" ).tabs();
+    // Hover states on the static widgets
+    $( "#dialog-link, #icons li" ).hover(
+      function() {
+        $( this ).addClass( "ui-state-hover" );
+      },
+      function() {
+        $( this ).removeClass( "ui-state-hover" );
+      }
+    );
+  $('.card-book-contents-body').hide()
+        // по клику отключаем класс folded, включаем unfolded, затем для следующего
+        // элемента после блока .card-book-contents-head (т.е. .card-book-contents-body) показываем текст спойлера
+        $('.card-book-contents-head').click(function(){
+            $(this).toggleClass("folded").toggleClass("unfolded").next().slideToggle()
+        });
+  $("#book-card-carousel").carouFredSel({
+    align: "left",
+    direction: "left",
+    width: 715,
+    items: {
+      width: 100,
+      height: 144
+    },
+    scroll: 3,
+    auto: false,
+    prev: "#book-card-carousel_prev",
+    next: "#book-card-carousel_next"
+  });
+});
